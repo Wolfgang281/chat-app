@@ -29,3 +29,18 @@ export const loginSchema = Joi.object({
     "any.required": "Password is required.",
   }),
 });
+
+export const updateProfileSchema = Joi.object({
+  firstName: Joi.string().required().messages({
+    "any.required": "First Name is required.",
+  }),
+  lastName: Joi.string().required().messages({
+    "any.required": "Last Name is required.",
+  }),
+  // image: Joi.string().required().messages({
+  //   "any.required": "Image is required.",
+  // }),
+  color: Joi.number().required().messages({
+    "any.required": "Color is required.",
+  }),
+});

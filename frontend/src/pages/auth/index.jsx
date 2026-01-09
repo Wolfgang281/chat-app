@@ -32,6 +32,7 @@ const Auth = () => {
         else navigate("/profile");
       }
     } catch (error) {
+      setUserInfo(null);
       toast.error(error.response?.data?.message);
     }
   };

@@ -60,6 +60,41 @@ export const login = asyncHandler(async (req, res, next) => {
   });
 });
 
+export const updateProfile = asyncHandler(async (req, res, next) => {
+  const userId = req.user._id;
+
+  const updatedUser = await UserModel.findByIdAndUpdate(
+    userId,
+    { ...req.body, profileSetup: true },
+    {
+      new: true,
+      runValidators: true,
+    }
+  );
+
+  if (!updatedUser) {
+    return next(new ErrorResponse("User not found", 404));
+  }
+
+  res.status(200).json({
+    success: true,
+    message: "Profile updated successfully",
+    user: updatedUser,
+  });
+});
+
+export const uploadImage = asyncHandler(async (req, res, next) => {
+  const userId = req.user._id;
+  console.log(req.file);
+
+  // const updatedUser = await UserModel.findByIdAndUpdate();
+});
+
 export const logout = asyncHandler(async (req, res, next) => {});
 
-export const getProfile = asyncHandler(async (req, res, next) => {});
+export const getProfile = asyncHandler(async (req, res, next) => {
+  const user = req.user;
+  res
+    .status(200)
+    .json({ success: true, message: "Profile fetched successfully", user });
+});
