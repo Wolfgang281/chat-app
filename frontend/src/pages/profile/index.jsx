@@ -15,23 +15,25 @@ const Profile = () => {
   const navigate = useNavigate();
 
   const { userInfo, setUserInfo } = useAppStore();
+  console.log("userInfo: ", userInfo);
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [image, setImage] = useState(null);
   const [hovered, setHovered] = useState(false);
   const [selectedColor, setSelectedColor] = useState(0);
+  const [imageLoading, setImageLoading] = useState(false);
   const fileInputRef = useRef(null);
 
   useEffect(() => {
     if (!userInfo) return;
 
     if (userInfo.profileSetup) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFirstName(userInfo.firstName ?? "");
       setLastName(userInfo.lastName ?? "");
       setSelectedColor(userInfo.color ?? 0);
     }
+    if (userInfo["profile-image"]) setImage(userInfo["profile-image"]);
   }, [userInfo]);
 
   const saveChanges = async () => {
@@ -66,18 +68,49 @@ const Profile = () => {
   const handleImageChange = async (e) => {
     const file = e.target.files[0];
     console.log(file);
+
+    // ✅ instant preview
+    const previewURL = URL.createObjectURL(file);
+    setImage(previewURL);
+
     const formData = new FormData();
-    formData.append("profile-image");
+    formData.append("profile-image", file);
     try {
+      setImageLoading(true);
       const response = await apiClient.patch(AUTH_ROUTES.ADD_IMAGE, formData);
       console.log(response);
+      setUserInfo({
+        ...userInfo,
+        "profile-image": response.data.user["profile-image"],
+      });
+      toast.success(response.data.message);
       // add
     } catch (error) {
       console.log(error);
+      toast.error(error.response.data.message);
+    } finally {
+      setImageLoading(false);
     }
   };
 
-  const handleDeleteImage = async () => {};
+  const handleDeleteImage = async () => {
+    try {
+      setImageLoading(true);
+      const response = await apiClient.patch(AUTH_ROUTES.DELETE_IMAGE);
+      console.log(response);
+      toast.success(response.data.message);
+      setUserInfo({
+        ...userInfo,
+        "profile-image": null,
+      });
+      setImage(null);
+    } catch (error) {
+      console.log(error);
+      toast.error(error.response.data.message);
+    } finally {
+      setImageLoading(false);
+    }
+  };
 
   return (
     <div className="bg-[#1b1c24] h-screen flex items-center justify-center flex-col gap-10">
@@ -105,7 +138,7 @@ const Profile = () => {
               ) : (
                 <div
                   className={`uppercase h-32 w-32 md:w-48 md:h-48 text-5xl border flex items-center justify-center rounded-full ${getColor(
-                    selectedColor
+                    selectedColor,
                   )}`}
                 >
                   {firstName
@@ -116,14 +149,23 @@ const Profile = () => {
             </Avatar>
             {hovered && (
               <div
-                className="absolute inset-0 flex items-center justify-center bg-black/50 ring-fuchsia-50 rounded-full"
-                onClick={image ? handleDeleteImage : handleFileInputClick}
+                className="absolute inset-0 flex items-center justify-center bg-black/60 rounded-full"
+                onClick={
+                  imageLoading
+                    ? undefined
+                    : image
+                      ? handleDeleteImage
+                      : handleFileInputClick
+                }
               >
-                {image ? (
+                {imageLoading ? (
+                  <div className="h-8 w-8 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : image ? (
                   <FaTrash className="text-white text-3xl cursor-pointer" />
                 ) : (
                   <FaPlus className="text-white text-3xl cursor-pointer" />
                 )}
+
                 <input
                   type="file"
                   ref={fileInputRef}
@@ -131,6 +173,7 @@ const Profile = () => {
                   onChange={handleImageChange}
                   name="profile-image"
                   accept=".png, .jpg, .jpeg, .svg, .webp"
+                  disabled={imageLoading}
                 />
               </div>
             )}
@@ -180,10 +223,11 @@ const Profile = () => {
         </div>
         <div className="w-full">
           <Button
-            className="h-16 w-full bg-purple-700 hover:bg-purple-900 transition-all duration-300"
+            disabled={imageLoading}
+            className="h-16 w-full bg-purple-700 hover:bg-purple-900 disabled:opacity-50"
             onClick={saveChanges}
           >
-            Save Changes
+            {imageLoading ? "Please wait..." : "Save Changes"}
           </Button>
         </div>
       </div>

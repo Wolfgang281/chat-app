@@ -1,3 +1,4 @@
+import animationData from "@/assets/lottie-json.json";
 import { clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -17,4 +18,13 @@ export const getColor = (color) => {
     return colors[color];
   }
   return colors[0]; // Fallback to the first color if out of range
+};
+
+export const animationDefaultOptions = {
+  loop: true,
+  autoplay: true,
+  animationData,
+  rendererSettings: {
+    preserveAspectRatio: "xMidYMid slice",
+  },
 };

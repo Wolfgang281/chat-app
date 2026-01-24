@@ -7,4 +7,6 @@ export const AUTH_ROUTES = {
   USER_INFO: `${BACKEND_URL}/auth/user-info`,
   UPDATE_PROFILE: `${BACKEND_URL}/auth/update-profile`,
   ADD_IMAGE: `${BACKEND_URL}/auth/add-image`,
+  DELETE_IMAGE: `${BACKEND_URL}/auth/delete-image`,
+  LOGOUT: `${BACKEND_URL}/auth/logout`,
 };

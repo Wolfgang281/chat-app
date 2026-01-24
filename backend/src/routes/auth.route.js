@@ -1,7 +1,9 @@
 import { Router } from "express";
 import {
+  deleteImage,
   getProfile,
   login,
+  logout,
   register,
   updateProfile,
   uploadImage,
@@ -27,14 +29,18 @@ router.patch(
   "/update-profile",
   authenticate,
   validateBody(updateProfileSchema),
-  updateProfile
+  updateProfile,
 );
 
 router.patch(
   "/add-image",
   authenticate,
   upload.single("profile-image"),
-  uploadImage
+  uploadImage,
 );
+
+router.patch("/delete-image", authenticate, deleteImage);
+
+router.post("/logout", authenticate, logout);
 
 export default router;

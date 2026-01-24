@@ -1,5 +1,10 @@
 import UserModel from "../models/User.model.js";
 import asyncHandler from "../utils/asyncHandler.util.js";
+import {
+  deleteImageFromCloud,
+  uploadImageToCloud,
+} from "../utils/cloudinary.util.js";
+import { getDataURL, getPublicIDFromURL } from "../utils/dataURL.util.js";
 import ErrorResponse from "../utils/ErrorResponse.util.js";
 import { generateToken } from "../utils/jwt.util.js";
 
@@ -69,7 +74,7 @@ export const updateProfile = asyncHandler(async (req, res, next) => {
     {
       new: true,
       runValidators: true,
-    }
+    },
   );
 
   if (!updatedUser) {
@@ -85,12 +90,64 @@ export const updateProfile = asyncHandler(async (req, res, next) => {
 
 export const uploadImage = asyncHandler(async (req, res, next) => {
   const userId = req.user._id;
-  console.log(req.file);
+  const dataURL = await getDataURL(req.file.buffer, req.file.mimetype);
+  const uploadedImageResp = await uploadImageToCloud(dataURL);
 
-  // const updatedUser = await UserModel.findByIdAndUpdate();
+  const updatedUser = await UserModel.findByIdAndUpdate(
+    userId,
+    { "profile-image": uploadedImageResp.secure_url },
+    {
+      new: true,
+      runValidators: true,
+    },
+  );
+
+  res.status(200).json({
+    success: true,
+    message: "Image uploaded successfully",
+    user: updatedUser,
+  });
 });
 
-export const logout = asyncHandler(async (req, res, next) => {});
+export const deleteImage = asyncHandler(async (req, res, next) => {
+  let userId = req.user._id;
+  let imageURL = req.user["profile-image"];
+
+  if (!!imageURL === false)
+    return next(new ErrorResponse("Image not found", 400));
+
+  let publicId = getPublicIDFromURL(imageURL);
+
+  const deleteResp = await deleteImageFromCloud(publicId);
+  if (!deleteResp) return next(new ErrorResponse("Image not deleted", 400));
+
+  const updatedUser = await UserModel.findByIdAndUpdate(
+    userId,
+    { "profile-image": "" },
+    {
+      new: true,
+      runValidators: true,
+    },
+  );
+
+  res.status(200).json({
+    success: true,
+    message: "Image deleted successfully",
+    user: updatedUser,
+  });
+});
+
+export const logout = asyncHandler(async (req, res, next) => {
+  res
+    .status(200)
+    .clearCookie("token", {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+      maxAge: 1, // 7 days
+    })
+    .json({ success: true, message: "User logged out successfully" });
+});
 
 export const getProfile = asyncHandler(async (req, res, next) => {
   const user = req.user;
