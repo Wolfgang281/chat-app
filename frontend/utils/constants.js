@@ -10,3 +10,7 @@ export const AUTH_ROUTES = {
   DELETE_IMAGE: `${BACKEND_URL}/auth/delete-image`,
   LOGOUT: `${BACKEND_URL}/auth/logout`,
 };
+
+export const CONTACT_ROUTES = {
+  SEARCH: `${BACKEND_URL}/contacts/search`,
+};
