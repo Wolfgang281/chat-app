@@ -1,6 +1,7 @@
 import app from "./app.js";
 import { connectDatabase } from "./src/config/database.config.js";
 import { PORT } from "./src/config/index.util.js";
+import { setupSocket } from "./src/config/socket.config.js";
 
 if (!PORT) {
   console.error("PORT is not defined in environment variables.");
@@ -9,11 +10,12 @@ if (!PORT) {
 
 connectDatabase()
   .then(() => {
-    app.listen(PORT, (err) => {
+    let server = app.listen(PORT, (err) => {
       if (err) {
         console.log(`Error while starting the server......`);
         process.exit(1);
       }
+      setupSocket(server);
       console.log(`Server is running on port ${PORT}`);
     });
 

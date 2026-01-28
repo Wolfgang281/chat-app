@@ -34,7 +34,6 @@ const NewDM = () => {
         const response = await apiClient.post(CONTACT_ROUTES.SEARCH, {
           searchedContact: searchedTerm,
         });
-        console.log(response);
         if (response.status == 200) {
           setSearchedContacts(response.data.contacts);
         }
@@ -53,12 +52,6 @@ const NewDM = () => {
       setSelectedChatType("contact");
       setSelectedChatData(contact);
       setSearchedContacts([]);
-
-      const response = await apiClient.post(CONTACT_ROUTES.CREATE_DM, contact);
-      console.log(response);
-      if (response.status == 200) {
-        setOpenNewContactModel(false);
-      }
     } catch (error) {
       console.log(error);
       toast.error(error.response.data.message);
@@ -92,6 +85,7 @@ const NewDM = () => {
             className="rounded-lg p-6 bg-[#2c2e3b] border-none text-white"
             onChange={(e) => searchContacts(e.target.value)}
           />
+
           <ScrollArea className="h-62.5">
             <div className="flex flex-col gap-5">
               {searchedContacts.map((contact) => (
