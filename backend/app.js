@@ -7,6 +7,7 @@ import errorMiddleware from "./src/middlewares/error.middleware.js";
 
 import authRoutes from "./src/routes/auth.route.js";
 import contactRoutes from "./src/routes/contact.route.js";
+import messageRoutes from "./src/routes/message.route.js";
 
 if (!FRONTEND_URL) {
   console.error("FRONTEND_URL is not defined in environment variables.");
@@ -29,6 +30,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/contacts", contactRoutes);
+app.use("/api/v1/messages", messageRoutes);
 
 app.use(errorMiddleware);
 

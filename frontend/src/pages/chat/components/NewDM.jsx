@@ -26,6 +26,7 @@ const NewDM = () => {
 
   const [openNewContactModel, setOpenNewContactModel] = useState(false);
   const [searchedContacts, setSearchedContacts] = useState([]);
+  console.log("searchedContacts: ", searchedContacts);
 
   const searchContacts = async (searchedTerm) => {
     console.log("searchedTerm:", searchedTerm);
@@ -34,6 +35,7 @@ const NewDM = () => {
         const response = await apiClient.post(CONTACT_ROUTES.SEARCH, {
           searchedContact: searchedTerm,
         });
+        console.log("response: ", response);
         if (response.status == 200) {
           setSearchedContacts(response.data.contacts);
         }
@@ -95,12 +97,12 @@ const NewDM = () => {
                   onClick={() => selectNewContact(contact)}
                 >
                   <div className="w-12 h-12 relative">
-                    <Avatar className="h-5 w-5 md:w-15 md:h-12 rounded-full overflow-hidden">
-                      {contact.image ? (
+                    <Avatar className="h-10 w-10 md:w-15 md:h-12 rounded-full overflow-hidden">
+                      {contact["profile-image"] ? (
                         <AvatarImage
-                          src={contact.image}
+                          src={contact["profile-image"]}
                           alt="profile"
-                          className="object-cover w-full h-full bg-black"
+                          className="object-cover w-full h-full bg-black rounded-full"
                         />
                       ) : (
                         <div

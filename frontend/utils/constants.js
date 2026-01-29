@@ -16,4 +16,9 @@ export const AUTH_ROUTES = {
 
 export const CONTACT_ROUTES = {
   SEARCH: `${BACKEND_URL}/contacts/search`,
+  GET_CONTACTS_FOR_DM: `${BACKEND_URL}/contacts/get-contacts`,
+};
+
+export const MESSAGE_ROUTES = {
+  GET_MESSAGES: `${BACKEND_URL}/messages/get-messages`,
 };

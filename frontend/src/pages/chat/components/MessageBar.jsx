@@ -3,8 +3,14 @@ import { useEffect, useRef, useState } from "react";
 import { GrAttachment } from "react-icons/gr";
 import { IoSend } from "react-icons/io5";
 import { RiEmojiStickerLine } from "react-icons/ri";
+import { useSocket } from "../../../context/SocketContext";
+import { useAppStore } from "../../../store";
 
 const MessageBar = () => {
+  const socket = useSocket();
+
+  const { selectedChatType, selectedChatData, userInfo } = useAppStore();
+
   const emojiRef = useRef();
 
   const [message, setMessage] = useState("");
@@ -22,7 +28,17 @@ const MessageBar = () => {
       document.removeEventListener("pointerdown", handleClickOutside);
   }, [emojiRef]);
 
-  const handleSendMessage = async () => {};
+  const handleSendMessage = async () => {
+    if (selectedChatType === "contact") {
+      socket.emit("sendMessage", {
+        sender: userInfo._id,
+        content: message,
+        recipient: selectedChatData._id,
+        messageType: "text",
+        fileURL: undefined,
+      });
+    }
+  };
 
   const handleAddEmoji = (emoji) => {
     console.log("emoji: ", emoji);
