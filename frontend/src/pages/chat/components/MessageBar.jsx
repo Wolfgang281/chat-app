@@ -3,13 +3,19 @@ import { useEffect, useRef, useState } from "react";
 import { GrAttachment } from "react-icons/gr";
 import { IoSend } from "react-icons/io5";
 import { RiEmojiStickerLine } from "react-icons/ri";
+import { MESSAGE_ROUTES } from "../../../../utils/constants";
 import { useSocket } from "../../../context/SocketContext";
+import apiClient from "../../../lib/axios";
 import { useAppStore } from "../../../store";
 
 const MessageBar = () => {
+  const fileInputRef = useRef();
+
   const socket = useSocket();
 
-  const { selectedChatType, selectedChatData, userInfo } = useAppStore();
+  const { selectedChatType, selectedChatData, userInfo, addMessage } =
+    useAppStore();
+  const [isUploading, setIsUploading] = useState(false);
 
   const emojiRef = useRef();
 
@@ -28,15 +34,80 @@ const MessageBar = () => {
       document.removeEventListener("pointerdown", handleClickOutside);
   }, [emojiRef]);
 
+  // const handleSendMessage = async () => {
+  //   if (selectedChatType === "contact") {
+  //     socket.emit("sendMessage", {
+  //       sender: userInfo._id,
+  //       content: message,
+  //       recipient: selectedChatData._id,
+  //       messageType: "text",
+  //       fileURL: undefined,
+  //     });
+  //   }
+
+  //   setMessage("");
+  // };
+
   const handleSendMessage = async () => {
     if (selectedChatType === "contact") {
-      socket.emit("sendMessage", {
+      const newMessage = {
+        _id: userInfo._id, // temporary id for UI
         sender: userInfo._id,
-        content: message,
         recipient: selectedChatData._id,
+        content: message,
         messageType: "text",
         fileURL: undefined,
-      });
+        createdAt: new Date().toISOString(),
+      };
+
+      addMessage(newMessage); // ✅ push message to store immediately
+      socket.emit("sendMessage", newMessage); // ✅ send to backend
+    }
+
+    setMessage("");
+  };
+
+  const handleAttachmentClick = () => {
+    if (fileInputRef.current) fileInputRef.current.click();
+  };
+
+  const handleAttachmentChange = async (event) => {
+    try {
+      const file = event.target.files[0];
+      // console.log("file: ", file);
+      setIsUploading(true); // set isUploading to true
+      if (file) {
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("id", selectedChatData._id);
+        const response = await apiClient.post(
+          MESSAGE_ROUTES.UPLOAD_FILE,
+          formData,
+        );
+        console.log("response: ", response);
+        // 🔥 VERY IMPORTANT: reset file input
+        event.target.value = "";
+        if (selectedChatType === "contact") {
+          const newMessage = {
+            sender: userInfo._id,
+            recipient: selectedChatData._id,
+            content: undefined,
+            messageType: "file",
+            fileURL: response.data.fileURL,
+            createdAt: new Date().toISOString(),
+          };
+
+          addMessage(newMessage); // ✅ push to store immediately
+          socket.emit("sendMessage", newMessage); // ✅ send to backend
+        }
+      }
+    } catch (error) {
+      console.log(error);
+      // 🔥 VERY IMPORTANT: reset file input
+      event.target.value = "";
+    } finally {
+      setIsUploading(false); // 🔥 stop loader
+      event.target.value = ""; // reset input
     }
   };
 
@@ -56,9 +127,24 @@ const MessageBar = () => {
           value={message}
           onChange={(e) => setMessage(e.target.value)}
         />
-        <button className="text-neutral-400 focus:outline-none transition-all duration-200 ease-out hover:text-white hover:scale-105 hover:shadow-[0_0_10px_rgba(79,70,229,0.45)] active:scale-95 active:rotate-3 active:text-indigo-400 active:shadow-[0_0_12px_rgba(79,70,229,0.6)]">
-          <GrAttachment className="text-2xl" />
+        <button
+          className="text-neutral-400 focus:outline-none transition-all duration-200 ease-out hover:text-white"
+          onClick={handleAttachmentClick}
+          disabled={isUploading}
+        >
+          {isUploading ? (
+            <div className="h-5 w-5 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin" />
+          ) : (
+            <GrAttachment className="text-2xl" />
+          )}
         </button>
+
+        <input
+          type="file"
+          className="hidden"
+          ref={fileInputRef}
+          onChange={handleAttachmentChange}
+        />
         <div className="relative">
           <button
             className=" text-neutral-400 focus:outline-none transition-all duration-200 ease-out hover:text-white hover:scale-105 hover:shadow-[0_0_10px_rgba(79,70,229,0.45)] active:scale-95 active:rotate-3 active:text-indigo-400 active:shadow-[0_0_12px_rgba(79,70,229,0.6)]"

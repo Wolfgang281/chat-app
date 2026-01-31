@@ -27,6 +27,7 @@ const Profile = () => {
 
   useEffect(() => {
     if (!userInfo) return;
+    console.log("userInfo: ", userInfo);
 
     if (userInfo.profileSetup) {
       setFirstName(userInfo.firstName ?? "");

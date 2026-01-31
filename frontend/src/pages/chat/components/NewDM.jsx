@@ -26,16 +26,14 @@ const NewDM = () => {
 
   const [openNewContactModel, setOpenNewContactModel] = useState(false);
   const [searchedContacts, setSearchedContacts] = useState([]);
-  console.log("searchedContacts: ", searchedContacts);
 
   const searchContacts = async (searchedTerm) => {
-    console.log("searchedTerm:", searchedTerm);
     try {
       if (searchedTerm.length > 0) {
         const response = await apiClient.post(CONTACT_ROUTES.SEARCH, {
           searchedContact: searchedTerm,
         });
-        console.log("response: ", response);
+
         if (response.status == 200) {
           setSearchedContacts(response.data.contacts);
         }
@@ -55,7 +53,6 @@ const NewDM = () => {
       setSelectedChatData(contact);
       setSearchedContacts([]);
     } catch (error) {
-      console.log(error);
       toast.error(error.response.data.message);
     }
   };

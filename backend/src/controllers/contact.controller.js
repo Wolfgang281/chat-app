@@ -69,12 +69,17 @@ export const getContactsForDM = asyncHandler(async (req, res, next) => {
     {
       $project: {
         _id: 1,
-        createdAt: 1,
         email: "$contactInfo.email",
         firstName: "$contactInfo.firstName",
         lastName: "$contactInfo.lastName",
-        profileImage: "$contactInfo['profile-image']",
+        profileImage: {
+          $getField: {
+            field: "profile-image",
+            input: "$contactInfo",
+          },
+        },
         color: "$contactInfo.color",
+        lastMessage: 1,
       },
     },
     {
@@ -84,6 +89,29 @@ export const getContactsForDM = asyncHandler(async (req, res, next) => {
 
   if (contacts.length === 0)
     return next(new ErrorResponse("No contacts found", 404));
+
+  res.status(200).json({
+    success: true,
+    message: "Contacts fetched successfully",
+    contacts,
+  });
+});
+
+export const getContacts = asyncHandler(async (req, res, next) => {
+  const users = await UserModel.find(
+    { _id: { $ne: req.user._id } },
+    "firstName lastName _id email",
+  );
+
+  if (users.length === 0)
+    return next(new ErrorResponse("No contacts found", 404));
+
+  const contacts = users.map((user) => ({
+    label: user.firstName ? `${user.firstName} ${user.lastName}` : user.email,
+    _id: user._id,
+    firstName: user.firstName,
+    lastName: user.lastName,
+  }));
 
   res.status(200).json({
     success: true,

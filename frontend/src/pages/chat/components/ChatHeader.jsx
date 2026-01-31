@@ -6,57 +6,61 @@ import { useAppStore } from "../../../store";
 const ChatHeader = () => {
   const { closeChat, selectedChatData, selectedChatType } = useAppStore();
 
+  if (!selectedChatData) return null;
+
   return (
-    <div className="h-[10vh] border-b-2 border-[#2f03cb] flex items-center  px-20">
-      <div className="flex gap-5 items-center w-full">
-        <div className="flex gap-9 items-center w-full">
-          <div className="w-12 h-12 relative">
-            <Avatar className="h-5 w-5 md:w-15 md:h-12 rounded-full overflow-hidden">
-              {selectedChatData.image ? (
+    <div className="h-[10vh] border-b-2 border-[#2f03cb] flex items-center px-6 md:px-20">
+      <div className="flex items-center justify-between w-full">
+        {/* LEFT: Avatar + Name */}
+        <div className="flex items-center gap-4">
+          {/* Avatar with Status Dot */}
+          <div className="relative">
+            <Avatar className="h-10 w-10 md:h-14 md:w-14 rounded-full overflow-hidden">
+              {selectedChatData.profileImage ? (
                 <AvatarImage
-                  src={selectedChatData.image}
+                  src={selectedChatData.profileImage}
                   alt="profile"
-                  className="object-cover w-full h-full bg-black"
+                  className="object-cover w-full h-full"
                 />
               ) : (
                 <div
-                  className={`uppercase h-32 w-32 md:w-48 md:h-48 text-5xl border flex items-center justify-center rounded-full ${getColor(
+                  className={`h-full w-full uppercase text-lg md:text-xl flex items-center justify-center rounded-full ${getColor(
                     selectedChatData.selectedColor,
                   )}`}
                 >
                   {selectedChatData.firstName
-                    ? selectedChatData.firstName.split("").shift()
-                    : selectedChatData.email.split("").shift()}
+                    ? selectedChatData.firstName[0]
+                    : selectedChatData.email[0]}
                 </div>
               )}
             </Avatar>
+
+            {/* Online Status Dot */}
+            {selectedChatData.isOnline && (
+              <span className="absolute bottom-0 right-0 h-3 w-3 md:h-4 md:w-4 rounded-full border-2 border-[#0f0f14] bg-green-500" />
+            )}
           </div>
-          <div>
+
+          {/* Name */}
+          <span className="text-white font-medium text-base md:text-lg">
             {selectedChatType === "contact" &&
-              " " +
-                selectedChatData.firstName +
-                " " +
-                selectedChatData.lastName}
-          </div>
+              `${selectedChatData.firstName} ${selectedChatData.lastName}`}
+          </span>
         </div>
 
-        <div className="flex items-center justify-center gap-5">
-          <button
-            className="
-              text-neutral-500
-              focus:outline-none
-              transition-all duration-200 ease-in-out
-              hover:text-white
-              active:scale-90
-              active:rotate-6
-              active:text-red-400
-              active:shadow-[0_0_12px_rgba(255,0,0,0.6)]
-            "
-            onClick={closeChat}
-          >
-            <RiCloseFill className="text-3xl" />
-          </button>
-        </div>
+        {/* RIGHT: Close Button */}
+        <button
+          onClick={closeChat}
+          className="
+            text-neutral-500
+            transition-all duration-200
+            hover:text-white
+            active:scale-90
+            active:text-red-400
+          "
+        >
+          <RiCloseFill className="text-3xl" />
+        </button>
       </div>
     </div>
   );

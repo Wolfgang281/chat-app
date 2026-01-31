@@ -10,10 +10,11 @@ const messageSchema = new mongoose.Schema(
     recipient: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
+      required: true,
     },
     messageType: {
       type: String,
-      enum: ["text", "image"],
+      enum: ["text", "file"],
       required: true,
     },
     content: {
@@ -33,5 +34,4 @@ const messageSchema = new mongoose.Schema(
 );
 
 const MessageModel = mongoose.model("Message", messageSchema);
-
 export default MessageModel;

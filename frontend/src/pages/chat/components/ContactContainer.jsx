@@ -3,6 +3,7 @@ import { CONTACT_ROUTES } from "../../../../utils/constants";
 import apiClient from "../../../lib/axios";
 import { useAppStore } from "../../../store";
 import ContactList from "./ContactList";
+import CreateChannel from "./CreateChannel";
 import NewDM from "./NewDM";
 import ProfileInfo from "./ProfileInfo";
 
@@ -12,9 +13,10 @@ const ContactContainer = () => {
   useEffect(() => {
     const getContacts = async () => {
       const response = await apiClient.get(CONTACT_ROUTES.GET_CONTACTS_FOR_DM);
-      console.log("response: ", response);
+      // console.log("response: ", response);
       if (response.data.contacts) {
         setDirectMessagesContacts(response.data.contacts);
+        // console.log("directMessagesContacts: ", directMessagesContacts);
       }
     };
 
@@ -41,7 +43,8 @@ const ContactContainer = () => {
       </div>
       <div className="my-5">
         <div className="flex items-center justify-between pr-10">
-          <Title text="Groups" />
+          <Title text="Channels" />
+          <CreateChannel />
         </div>
       </div>
       <ProfileInfo />
